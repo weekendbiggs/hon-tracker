@@ -3,6 +3,7 @@ dist
 .DS_Store
 *.local
 .vscode
+*.tsbuildinfo
 
 # Local reference material — not for publishing
 HenArticle.pdf
