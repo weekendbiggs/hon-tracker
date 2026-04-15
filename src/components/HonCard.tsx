@@ -30,10 +30,16 @@ export default function HonCard({ color, owned = [] }: Props) {
         } as React.CSSProperties
       }
     >
+      {color.isIridescent && <span className="shimmer-rainbow" aria-hidden />}
       <div
         className="aspect-square rounded-lg overflow-hidden mb-3 flex items-center justify-center relative"
         style={{
-          background: `linear-gradient(160deg, rgba(${rgb},0.35), rgba(${rgb2},0.55))`,
+          background: isOwned
+            ? `radial-gradient(120% 80% at 50% 10%, rgba(255,255,255,0.55), rgba(255,255,255,0) 55%), linear-gradient(160deg, rgba(${rgb},0.45), rgba(${rgb2},0.70))`
+            : `radial-gradient(120% 80% at 50% 10%, rgba(255,255,255,0.7), rgba(255,255,255,0) 55%), linear-gradient(160deg, rgba(${rgb},0.06), rgba(${rgb2},0.12))`,
+          boxShadow: isOwned
+            ? `inset 0 1px 0 rgba(255,255,255,0.6), inset 0 -12px 20px -8px rgba(${rgb},0.35)`
+            : `inset 0 0 0 1px rgba(${rgb},0.18)`,
         }}
       >
         {photoUrl ? (
@@ -45,8 +51,9 @@ export default function HonCard({ color, owned = [] }: Props) {
           />
         ) : (
           <HenSilhouette
-            color={isOwned ? color.hexColor : `rgba(${rgb}, 0.45)`}
-            className="w-3/4 h-3/4"
+            color={isOwned ? color.hexColor : `rgba(${rgb}, 0.55)`}
+            outline={!isOwned}
+            className="w-4/5 h-4/5"
             title={color.name}
           />
         )}
