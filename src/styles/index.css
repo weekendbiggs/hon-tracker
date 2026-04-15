@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-warm: #FAF7F2;
+  --bg-card: #FFFFFF;
+  --text-primary: #2C2418;
+  --text-secondary: #7A6F60;
+  --accent-gold: #C8922A;
+  --accent-success: #2D8B46;
+  --wood-dark: #3D2B1F;
+}
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg-warm);
+  color: var(--text-primary);
+}
+
+body {
+  font-family: "Source Sans 3", "DM Sans", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, .font-serif {
+  font-family: "Playfair Display", Lora, Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+a { color: inherit; }
+button { font: inherit; }
+
+/* Beaded border: row of small circles using radial gradient dots */
+.beaded-border {
+  background-image: radial-gradient(circle, rgba(61, 43, 31, 0.35) 1.5px, transparent 2px);
+  background-size: 10px 10px;
+  background-position: 0 50%;
+  background-repeat: repeat-x;
+  height: 10px;
+}
+
+/* Utility: pill badge */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.pill-common    { background: rgba(122, 111, 96, 0.12); color: #5A5040; }
+.pill-uncommon  { background: rgba(200, 146, 42, 0.18); color: #7A5A10; }
+.pill-scarce    { background: rgba(155, 27, 48, 0.15); color: #6E0E22; }
+
+/* Skeleton shimmer */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    rgba(0,0,0,0.04) 0%,
+    rgba(0,0,0,0.08) 50%,
+    rgba(0,0,0,0.04) 100%
+  );
+  background-size: 200% 100%;
+  animation: skeleton 1.4s ease-in-out infinite;
+}
+@keyframes skeleton {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Focus */
+:focus-visible {
+  outline: 2px solid var(--accent-gold);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Hide scrollbar on horizontal timeline (keep scrollable) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { scrollbar-width: none; }
