@@ -46,5 +46,21 @@
     "notes": "",
     "isFavorite": false,
     "createdAt": "2026-04-21T23:43:57.083Z"
+  },
+  {
+    "id": "mo99szhl-mmle0f",
+    "honColorId": 20,
+    "dateAcquired": "2026-04-21",
+    "purchasePrice": 33,
+    "purchaseSource": "",
+    "condition": "poor",
+    "nestType": "striated",
+    "hasSlottedBeads": false,
+    "hasDecoration": false,
+    "decorationCondition": "",
+    "photoUrl": "",
+    "notes": "",
+    "isFavorite": false,
+    "createdAt": "2026-04-21T23:44:10.665Z"
   }
 ]
