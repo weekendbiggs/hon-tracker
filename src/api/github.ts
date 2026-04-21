@@ -1,16 +1,16 @@
 import { CONFIG, dataPath } from "@/config";
-import { getPat } from "@/auth/pat";
+import { getToken } from "@/auth/oauth";
 import type { CollectionItem, PriceEntry } from "./types";
 
 const API = "https://api.github.com";
 
 function headers(): HeadersInit {
-  const pat = getPat();
-  if (!pat) throw new Error("No PAT set");
+  const token = getToken();
+  if (!token) throw new Error("Not signed in");
   return {
     Accept: "application/vnd.github+json",
     "X-GitHub-Api-Version": "2022-11-28",
-    Authorization: `Bearer ${pat}`,
+    Authorization: `Bearer ${token}`,
   };
 }
 

@@ -1,0 +1,11 @@
+name = "hon-oauth-worker"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+
+[vars]
+# Set this to your GitHub Pages origin (no trailing slash)
+ALLOWED_ORIGIN = "https://weekendbiggs.github.io"
+
+# Secrets — set these via:
+#   npx wrangler secret put GITHUB_CLIENT_ID
+#   npx wrangler secret put GITHUB_CLIENT_SECRET
