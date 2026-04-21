@@ -14,30 +14,37 @@ export default {
       return error("Not found", 404, env);
     }
 
+    if (!env.GITHUB_CLIENT_ID || !env.GITHUB_CLIENT_SECRET) {
+      return error("Worker secrets not configured", 500, env);
+    }
+
     const body = await request.json<{ code: string }>().catch(() => null);
     if (!body?.code) {
       return error("Missing 'code' in request body", 400, env);
     }
 
+    // Use application/x-www-form-urlencoded — the OAuth2 spec standard
     const tokenRes = await fetch("https://github.com/login/oauth/access_token", {
       method: "POST",
-      headers: { Accept: "application/json", "Content-Type": "application/json" },
-      body: JSON.stringify({
+      headers: { Accept: "application/json" },
+      body: new URLSearchParams({
         client_id: env.GITHUB_CLIENT_ID,
         client_secret: env.GITHUB_CLIENT_SECRET,
         code: body.code,
       }),
     });
 
+    const text = await tokenRes.text();
     if (!tokenRes.ok) {
-      return error(`GitHub returned ${tokenRes.status}`, 502, env);
+      return error(`GitHub returned ${tokenRes.status}: ${text}`, 502, env);
     }
 
-    const data = await tokenRes.json<{
-      access_token?: string;
-      error?: string;
-      error_description?: string;
-    }>();
+    let data: { access_token?: string; error?: string; error_description?: string };
+    try {
+      data = JSON.parse(text);
+    } catch {
+      return error(`Unexpected GitHub response: ${text}`, 502, env);
+    }
 
     if (data.error || !data.access_token) {
       return error(data.error_description || data.error || "Unknown error", 400, env);
