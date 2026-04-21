@@ -2,45 +2,61 @@
 
 A mobile-first web app for tracking a personal collection of Indiana Glass Hen-on-Nest (HON) covered dishes. Public gallery for visitors; a private admin area for the owner to log pieces and prices.
 
-**$0 recurring cost.** GitHub Pages hosts the site, the same GitHub repo stores the data (JSON files + photos), and a single fine-grained Personal Access Token is the only secret you need.
+**$0 recurring cost.** GitHub Pages hosts the site, the same GitHub repo stores the data (JSON files + photos), and a Cloudflare Worker handles secure GitHub OAuth sign-in.
 
-## Quick start (≈3 minutes)
+## Quick start
+
+### 1. Clone & install
 
 ```sh
 npm install
-./scripts/bootstrap.sh           # creates the repo, pushes, enables Pages
 ```
 
-Then:
+### 2. Set up GitHub OAuth
 
-1. Open the PAT creation link the script prints (pre-filled with the right scopes).
-2. Visit your site (`https://<you>.github.io/hon-tracker/`).
-3. Tap **Admin**, paste the PAT once, and start adding HONs.
+1. Go to https://github.com/settings/developers → **OAuth Apps** → **New OAuth App**.
+2. Set the homepage and callback URLs to your GitHub Pages URL (e.g. `https://<you>.github.io/hon-tracker/`).
+3. Note the **Client ID** and generate a **Client Secret**.
 
-That's it. Writes commit directly to `main`, GitHub Pages redeploys on every push, and the admin UI updates optimistically so the ~30-second rebuild delay is invisible.
+### 3. Deploy the Cloudflare Worker
 
-## No `gh` CLI?
+The `worker/` directory contains a tiny OAuth token-exchange proxy (~50 lines). Deploy it to Cloudflare's free tier:
 
-Do it manually:
+```sh
+cd worker
+npm install
+npx wrangler login
+npx wrangler secret put GITHUB_CLIENT_ID      # paste your Client ID
+npx wrangler secret put GITHUB_CLIENT_SECRET   # paste your Client Secret
+npx wrangler deploy
+```
 
-1. Create a new GitHub repo (public) called `hon-tracker`.
-2. `git init -b main && git add . && git commit -m "init" && git remote add origin <url> && git push -u origin main`
-3. Repo Settings → Pages → Source: **GitHub Actions**.
-4. Create a fine-grained PAT: repo = `hon-tracker`, permissions = **Contents: Read & write**, **Metadata: Read-only**.
-5. Visit the site, open Admin, paste the PAT.
+Update `ALLOWED_ORIGIN` in `worker/wrangler.toml` to match your GitHub Pages origin before deploying.
+
+### 4. Configure GitHub Pages
+
+1. Repo Settings → Pages → Source: **GitHub Actions**.
+2. Repo Settings → Secrets and variables → Actions → **Variables** → add:
+   - `VITE_GITHUB_CLIENT_ID` — your OAuth App Client ID
+   - `VITE_OAUTH_WORKER_URL` — your deployed worker URL (e.g. `https://hon-oauth-worker.your-account.workers.dev`)
+3. Push to `main` — the site deploys automatically.
+
+### 5. Add collaborators
+
+Anyone who needs admin access should be added as a **collaborator** on the repo (Settings → Collaborators). They sign in with their own GitHub account — no tokens to share.
 
 ## Architecture
 
 - **Frontend** — Vite + React 18 + Tailwind + TypeScript + HashRouter. Deployed to GitHub Pages.
 - **Data** — `public/data/collection.json` and `public/data/prices.json` are the database. They're served as static assets on reads, written via the GitHub Contents API on admin edits.
 - **Photos** — drag-dropped images are committed to `public/photos/` via the Contents API. The raw file URL is stored on the collection item.
-- **Auth** — a fine-grained GitHub PAT scoped to this one repo, stored in the admin user's `localStorage`.
+- **Auth** — GitHub OAuth. A Cloudflare Worker exchanges the OAuth code for an access token (keeping the client secret server-side). The token is stored in the user's `localStorage`.
 - **Reference data** — all 22 HON colors are bundled in [src/data/colors.ts](src/data/colors.ts) so the UI renders instantly before any network fetch.
 
 ```
-User opens /            →   Pages CDN serves index.html + bundle + data/*.json   →   instant gallery
-Owner opens /admin      →   enters PAT once                                      →   localStorage
-Owner adds a HON        →   PATCH/PUT Contents API on collection.json            →   commit on main
+Visitor opens /         →   Pages CDN serves index.html + bundle + data/*.json   →   instant gallery
+Owner opens /admin      →   clicks "Sign in with GitHub"                         →   OAuth token in localStorage
+Owner adds a HON        →   PUT Contents API on collection.json                  →   commit on main
 Pages auto-rebuilds     →   new data live in ~30-60s (UI already optimistic)
 ```
 
@@ -57,12 +73,13 @@ src/
   data/colors.ts              22 HON colors (bundled, authoritative)
   api/reads.ts                Static fetch of data files
   api/github.ts               Contents API wrapper (GET sha, PUT base64)
-  auth/pat.ts                 PAT in localStorage
+  auth/oauth.ts               GitHub OAuth flow + token storage
   hooks/                      useCollection, usePrices, useAdmin (single-source cache + emit)
   components/                 HonCard, HonGrid, CompletenessRing, NestEggDashboard,
                               PriceChart, ProductionTimeline, PhotoDrop, Nav, Guard, ui/
   pages/                      Gallery, HenDetail, Wishlist, Market, Timeline, Admin*
   styles/                     index.css (tokens + Tailwind), glass.css (skeuomorphism)
+worker/                       Cloudflare Worker for OAuth token exchange
 scripts/bootstrap.sh          One-command deploy
 ```
 
@@ -76,7 +93,7 @@ npm run preview       # serve dist/
 npm run typecheck     # TypeScript only
 ```
 
-Local dev reads `public/data/*.json` directly (no network round-trip). To test writes locally, paste a PAT into Admin; writes will still hit GitHub — be careful, they really do commit.
+Local dev reads `public/data/*.json` directly (no network round-trip). To test writes locally, sign in via GitHub OAuth; writes will still hit GitHub — be careful, they really do commit.
 
 ## Deferred features
 
