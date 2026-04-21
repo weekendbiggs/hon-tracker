@@ -1,1 +1,18 @@
-[]
+[
+  {
+    "id": "mo84v32u-vyk3h7",
+    "honColorId": 8,
+    "dateAcquired": "2026-04-21",
+    "purchasePrice": 60,
+    "purchaseSource": "estate sale",
+    "condition": "good",
+    "nestType": "stippled",
+    "hasSlottedBeads": true,
+    "hasDecoration": true,
+    "decorationCondition": "partial",
+    "photoUrl": "",
+    "notes": "wow! so hon!",
+    "isFavorite": true,
+    "createdAt": "2026-04-21T04:38:04.374Z"
+  }
+]
